@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel - Cardápio</title>
+
+    <link rel="stylesheet" href="../css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../css/fontawesome.css" />
+    <link rel="stylesheet" href="../css/animate.css" />
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="./css/painel.css" />
+</head>
+<body>
+
+    <div class="container-mensagens" id="container-mensagens"></div>
+
+    <header class="painel-topo">
+        <div class="container d-flex align-items-center justify-content-between">
+            <h1 class="painel-titulo"><i class="fas fa-book-open"></i>&nbsp; Painel do Cardápio</h1>
+            <div>
+                <a href="../index.html" target="_blank" class="btn btn-white btn-sm mr-2"><i class="fas fa-external-link-alt"></i>&nbsp; Ver site</a>
+                <a href="javascript:void(0)" id="btnRestaurar" class="btn btn-white btn-sm"><i class="fas fa-undo"></i>&nbsp; Restaurar padrão</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container painel-corpo">
+
+        <p class="painel-aviso">
+            <i class="fas fa-info-circle"></i>
+            Modo demonstração: as alterações ficam salvas apenas neste navegador (localStorage).
+        </p>
+
+        <div class="painel-barra">
+            <div id="abasCategorias" class="painel-abas"></div>
+            <div class="painel-acoes">
+                <input type="text" id="txtBusca" class="form-control" placeholder="Buscar item..." />
+                <a href="javascript:void(0)" id="btnNovo" class="btn btn-yellow btn-sm"><i class="fas fa-plus"></i>&nbsp; Novo item</a>
+            </div>
+        </div>
+
+        <div class="card painel-tabela">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:80px">Imagem</th>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th style="width:110px">Preço</th>
+                        <th style="width:90px" class="text-center">Ativo</th>
+                        <th style="width:110px" class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="listaItens"></tbody>
+            </table>
+            <p id="listaVazia" class="text-center mt-4 mb-4 hidden">Nenhum item encontrado.</p>
+        </div>
+
+    </main>
+
+    <!-- Modal adicionar/editar -->
+    <div class="painel-modal hidden" id="modalItem">
+        <div class="painel-modal-conteudo card animated fadeIn">
+            <h2 id="tituloModal" class="painel-modal-titulo">Novo item</h2>
+
+            <input type="hidden" id="itemIdOriginal" />
+            <input type="hidden" id="itemCategoriaOriginal" />
+
+            <div class="form-group">
+                <label>Categoria</label>
+                <select id="selCategoria" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label>Nome</label>
+                <input type="text" id="txtNome" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Descrição</label>
+                <input type="text" id="txtDescricao" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Preço (R$)</label>
+                <input type="text" id="txtPreco" class="form-control" placeholder="0,00" />
+            </div>
+            <div class="form-group">
+                <label>Imagem</label>
+                <input type="file" id="fileImagem" accept="image/*" class="form-control-file" />
+                <small class="text-muted">ou informe uma URL / caminho:</small>
+                <input type="text" id="txtImagem" class="form-control mt-1" placeholder="./img/cardapio/..." />
+                <img id="previewImagem" class="painel-preview hidden" />
+            </div>
+            <div class="form-group">
+                <label class="mb-0"><input type="checkbox" id="chkAtivo" checked /> Item ativo (visível no site)</label>
+            </div>
+
+            <div class="text-right mt-4">
+                <a href="javascript:void(0)" id="btnCancelar" class="btn btn-white btn-sm mr-2">Cancelar</a>
+                <a href="javascript:void(0)" id="btnSalvar" class="btn btn-yellow btn-sm">Salvar</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal exclusão -->
+    <div class="painel-modal hidden" id="modalExcluir">
+        <div class="painel-modal-conteudo card animated fadeIn" style="max-width:420px">
+            <h2 class="painel-modal-titulo">Excluir item</h2>
+            <p>Tem certeza que deseja excluir <b id="lblExcluir"></b>?</p>
+            <div class="text-right mt-4">
+                <a href="javascript:void(0)" id="btnCancelarExcluir" class="btn btn-white btn-sm mr-2">Cancelar</a>
+                <a href="javascript:void(0)" id="btnConfirmarExcluir" class="btn btn-sm btn-excluir">Excluir</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="../js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="../js/dados.js"></script>
+    <script type="text/javascript" src="../js/menu-storage.js"></script>
+    <script type="text/javascript" src="./js/painel.js"></script>
+</body>
+</html>
+
