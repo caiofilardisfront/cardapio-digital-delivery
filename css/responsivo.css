@@ -197,3 +197,230 @@
     }
 
 }
+
+/* ==========================================================================
+   REMODELAGEM MOBILE - foco em cliente no estabelecimento / uso com uma mão
+   (alvos de toque >= 44px, categorias fixas, barra de carrinho fixa)
+   ========================================================================== */
+
+html { scroll-behavior: smooth; }
+
+.barra-carrinho { display: none; }
+
+@keyframes barraPulse {
+    0%   { transform: translateY(0) scale(1); }
+    40%  { transform: translateY(-6px) scale(1.03); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes barraSobe {
+    from { transform: translateY(120%); }
+    to   { transform: translateY(0); }
+}
+
+@media (max-width: 767px) {
+
+    body { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
+
+    /* --- topo / banner mais compacto --- */
+    .header { padding-top: 5px; }
+    .banner { padding-top: 20px; padding-bottom: 30px; }
+    .text-banner { margin-bottom: 10px; }
+    .text-banner h1 { font-size: 30px; }
+    .text-banner .btn { min-height: 48px; }
+    .btn-social { min-height: 48px; width: 48px; }
+
+    /* --- categorias fixas (sticky) em "pílulas" --- */
+    .cardapio .container-menu {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--color-background);
+        margin-bottom: 15px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        align-self: flex-start;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        scrollbar-width: none;
+        box-shadow: 0 6px 10px -8px rgba(0, 0, 0, .25);
+    }
+    .cardapio .container-menu::-webkit-scrollbar { display: none; }
+    .cardapio .container-menu .btn {
+        flex: none;
+        white-space: nowrap;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        scroll-snap-align: start;
+        margin-right: 10px !important;
+    }
+
+    /* --- cards do cardápio: controles SEMPRE visíveis (touch não tem hover) --- */
+    .card-item,
+    .card-item:hover {
+        height: auto;
+        min-height: 130px;
+        padding: 12px 12px 12px 108px;
+        background-color: var(--color-white);
+        justify-content: center;
+        align-items: stretch;
+    }
+    .img-produto { left: 12px; top: 12px; }
+    .card-item .img-produto img { width: 84px; height: 84px; object-fit: cover; }
+
+    .card-item .title-produto,
+    .card-item:hover .title-produto {
+        display: block;
+        height: auto !important;
+        margin-bottom: 2px;
+        font-size: 17px;
+    }
+    .card-item .price-produto,
+    .card-item:hover .price-produto {
+        color: var(--color-primary) !important;
+        margin-top: 0;
+        margin-bottom: 6px !important;
+        font-size: 20px !important;
+    }
+    .card-item .add-carrinho,
+    .card-item:hover .add-carrinho {
+        display: flex;
+        height: auto;
+        justify-content: flex-start;
+    }
+    .card-item .btn-menos, .card-item .btn-mais {
+        min-width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+    }
+    .card-item .add-numero-itens {
+        min-width: 40px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 8px;
+    }
+    .card-item .btn-add {
+        min-width: 56px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        font-size: 18px;
+    }
+    .card-item:active { transform: scale(.98); transition: transform .1s; }
+
+    /* --- botão redondo antigo substituído pela barra fixa --- */
+    .botao-carrinho { display: none !important; }
+
+    /* --- barra de carrinho fixa no rodapé (zona do polegar) --- */
+    .barra-carrinho {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        z-index: 1000;
+        min-height: 58px;
+        padding: 8px 12px 8px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--color-black-heavy);
+        color: var(--color-white);
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, .35);
+        cursor: pointer;
+        animation: barraSobe .3s ease-out;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .barra-carrinho.pulse { animation: barraPulse .4s ease-out; }
+    .barra-qtd { font-size: 14px; }
+    .barra-qtd i { color: var(--color-primary); margin-right: 4px; }
+    .barra-total { font-size: 18px; font-weight: bold; margin: 0 8px; }
+    .barra-cta {
+        background: var(--color-primary);
+        color: var(--color-black-heavy);
+        font-weight: bold;
+        font-size: 15px;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+    .barra-cta i { margin-left: 6px; font-size: 12px; }
+
+    /* --- carrinho (tela cheia) com rodapé fixo e alvos grandes --- */
+    .modal-full {
+        padding: 20px 16px 0 16px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .modal-full .m-header .btn { min-height: 44px; }
+    .m-footer {
+        position: sticky;
+        bottom: 0;
+        background: var(--color-white);
+        margin: 0 -16px;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+        box-shadow: 0 -8px 15px -10px rgba(0, 0, 0, .2);
+    }
+    .m-footer .container { display: flex; flex-wrap: wrap; padding: 0; }
+    .m-footer .container-total { flex: 0 0 100%; padding-top: 10px; margin-bottom: 12px !important; }
+    .m-footer .btn {
+        float: none !important;
+        flex: 1;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 !important;
+    }
+    .m-footer #btnVoltar { order: -1; flex: 0 0 35%; margin-right: 10px !important; }
+
+    .modal-full .item-carrinho { flex-wrap: wrap; }
+    .modal-full .item-carrinho .dados-produto { flex: 1; min-width: 0; }
+    .modal-full .item-carrinho:not(.resumo) .add-carrinho {
+        flex: 0 0 100%;
+        height: auto;
+        justify-content: flex-start;
+        margin-top: 12px;
+    }
+    .modal-full .btn-menos, .modal-full .btn-mais,
+    .modal-full .btn-remove {
+        min-width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-full .add-numero-itens {
+        min-width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-full .btn-remove { margin-left: auto; }
+    .modal-full .form-control { min-height: 52px; font-size: 16px; }
+    .container-cep .btn { top: 41px; min-height: 40px; }
+
+    /* --- mensagens (toasts) em largura total, longe do polegar --- */
+    .container-mensagens { left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top)); }
+    .toast { text-align: center; font-size: 16px; }
+
+    /* --- rodapé não fica atrás da barra fixa --- */
+    footer { padding-bottom: 20px; }
+}
+
+/* respeita quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .barra-carrinho, .barra-carrinho.pulse { animation: none; }
+}

@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <title>Restaurante - Seja bem-vindo!</title>
 
         <link rel="stylesheet" href="./css/bootstrap.min.css" />
@@ -73,7 +73,7 @@
                                 Aproveite nosso cardápio! Escolha o que desejar e recebe em sua casa de forma rápida e segura.
                             </p>
                             <div class="wow fadeIn delay-05s">
-                                <a class="btn btn-yellow mt-4 mr-3">
+                                <a href="#cardapio" class="btn btn-yellow mt-4 mr-3">
                                     Ver cardápio
                                 </a>
                                 <a href="#" class="btn btn-white btn-icon-left mt-4" id="btnLigar">
@@ -179,6 +179,19 @@
                         <h1 class="title">
                             <b>Conheça o nosso cardápio</b>
                         </h1>
+                    </div>
+
+                    <div class="col-12 col-one mb-4 wow fadeInUp" id="maisPedidos">
+                        <p class="titulo-secao"><i class="fas fa-fire"></i>&nbsp; <b>Mais pedidos</b></p>
+                        <div class="lista-populares" id="listaPopulares"></div>
+                    </div>
+
+                    <div class="col-12 col-one mb-4 wow fadeInUp">
+                        <div class="busca-wrap">
+                            <i class="fas fa-search"></i>
+                            <input id="txtBusca" type="search" class="form-control" placeholder="Buscar no cardápio..." autocomplete="off" oninput="cardapio.metodos.buscarItens()" />
+                            <a id="btnLimparBusca" class="limpar-busca hidden" onclick="cardapio.metodos.limparBusca()"><i class="fas fa-times"></i></a>
+                        </div>
                     </div>
 
                     <div class="col-12 col-one container-menu wow fadeInUp">
@@ -396,6 +409,12 @@
         </footer>
 
 
+        <a class="barra-carrinho hidden" id="barraCarrinho" onclick="cardapio.metodos.abrirCarrinho(true)">
+            <span class="barra-qtd"><i class="fa fa-shopping-bag"></i> <b class="barra-itens">0</b> itens</span>
+            <span class="barra-total">R$ 0,00</span>
+            <span class="barra-cta">Ver carrinho <i class="fas fa-chevron-right"></i></span>
+        </a>
+
         <div class="modal-full animated fadeIn hidden" id="modalCarrinho">
 
             <div class="m-header">
@@ -422,6 +441,10 @@
                     </div>
 
                     <div id="localEntrega" class="row mr-0 ml-0 animated fadeIn hidden">
+
+                        <div class="col-12 mb-3 hidden" id="avisoEnderecoSalvo">
+                            <span class="aviso-endereco"><i class="fas fa-history"></i> Usamos o seu último endereço. <a href="javascript:void(0)" onclick="cardapio.metodos.limparEndereco()">Usar outro</a></span>
+                        </div>
 
                         <div class="col-12 col-lg-4 col-md-4 col-sm-12">
                             <div class="form-group container-cep">

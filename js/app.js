@@ -18,6 +18,9 @@ cardapio.eventos = {
         cardapio.metodos.obterItensCardapio();
         cardapio.metodos.carregarBotaoLigar();
         cardapio.metodos.carregarBotaoReserva();
+        cardapio.metodos.carregarMaisPedidos();
+        $("#btnEtapaResumo").on('click', cardapio.metodos.registrarPedido);
+        cardapio.iniciado = true;
     }
 
 }
@@ -28,6 +31,11 @@ cardapio.metodos = {
     obterItensCardapio: (categoria = 'burgers', vermais = false) => {
 
         var filtro = MENU[categoria];
+
+        // ao escolher categoria, limpa a busca e volta a exibir "mais pedidos"
+        $("#txtBusca").val('');
+        $("#btnLimparBusca").addClass('hidden');
+        cardapio.metodos.alternarMaisPedidos(true);
         console.log(filtro);
 
         if (!vermais) {
@@ -59,6 +67,12 @@ cardapio.metodos = {
 
         // seta o menu para ativo
         $("#menu-" + categoria).addClass('active')
+
+        // mobile: ao trocar de categoria, volta para o topo da lista
+        if (cardapio.iniciado && window.innerWidth < 768) {
+            var topo = $("#cardapio .container-menu").offset().top - 5;
+            $('html, body').animate({ scrollTop: topo }, 250);
+        }
 
     },
 
@@ -98,14 +112,9 @@ cardapio.metodos = {
 
         if (qntdAtual > 0) {
 
-            // obter a categoria ativa
-            var categoria = $(".container-menu a.active").attr('id').split('menu-')[1];
-
-            // obtem a lista de itens
-            let filtro = MENU[categoria];
-
-            // obtem o item
-            let item = $.grep(filtro, (e, i) => { return e.id == id });
+            // obtem o item (em qualquer categoria)
+            let achado = cardapio.metodos.buscarItemPorId(id);
+            let item = achado ? [$.extend({}, achado)] : [];
 
             if (item.length > 0) {
 
@@ -138,10 +147,31 @@ cardapio.metodos = {
     atualizarBadgeTotal: () => {
 
         var total = 0;
+        var subtotal = 0;
 
         $.each(MEU_CARRINHO, (i, e) => {
-            total += e.qntd
+            total += e.qntd;
+            subtotal += e.price * e.qntd;
         })
+
+        // barra de carrinho fixa (mobile)
+        $(".barra-itens").text(total);
+        $(".barra-total").text('R$ ' + subtotal.toFixed(2).replace('.', ','));
+
+        if (total > 0) {
+            $("#barraCarrinho").removeClass('hidden');
+        } else {
+            $("#barraCarrinho").addClass('hidden');
+        }
+
+        // feedback ao adicionar: pulso + vibração
+        if (total > (cardapio.ultimoTotal || 0)) {
+            $("#barraCarrinho").removeClass('pulse');
+            void document.getElementById('barraCarrinho').offsetWidth;
+            $("#barraCarrinho").addClass('pulse');
+            if (navigator.vibrate) { navigator.vibrate(30); }
+        }
+        cardapio.ultimoTotal = total;
 
         if (total > 0) {
             $(".botao-carrinho").removeClass('hidden');
@@ -345,6 +375,7 @@ cardapio.metodos = {
         } 
 
         cardapio.metodos.carregarEtapa(2);
+        cardapio.metodos.preencherEnderecoSalvo();
 
     },
 
@@ -452,6 +483,8 @@ cardapio.metodos = {
             complemento: complemento
         }
 
+        try { localStorage.setItem('cardapio_endereco', JSON.stringify(MEU_ENDERECO)); } catch (e) { }
+
         cardapio.metodos.carregarEtapa(3);
         cardapio.metodos.carregarResumo();
 
@@ -536,6 +569,212 @@ cardapio.metodos = {
 
     },
 
+    // procura um item pelo id em todas as categorias
+    buscarItemPorId: (id) => {
+
+        var achado = null;
+
+        $.each(MENU, (cat, lista) => {
+            $.each(lista, (i, e) => {
+                if (e.id == id) { achado = e; return false; }
+            });
+            if (achado) { return false; }
+        });
+
+        return achado;
+
+    },
+
+    // remove acentos e deixa minúsculo para comparar textos
+    normalizarTexto: (t) => {
+        return (t || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    },
+
+    // busca por nome/descrição em todo o cardápio
+    buscarItens: () => {
+
+        var termo = cardapio.metodos.normalizarTexto($("#txtBusca").val()).trim();
+
+        if (termo.length == 0) {
+            cardapio.metodos.limparBusca();
+            return;
+        }
+
+        $("#btnLimparBusca").removeClass('hidden');
+        $("#btnVerMais").addClass('hidden');
+        cardapio.metodos.alternarMaisPedidos(false);
+        $(".container-menu a").removeClass('active');
+
+        $("#itensCardapio").html('');
+        var encontrados = 0;
+
+        $.each(MENU, (cat, lista) => {
+            $.each(lista, (i, e) => {
+
+                var texto = cardapio.metodos.normalizarTexto(e.name + ' ' + e.dsc);
+
+                if (texto.indexOf(termo) >= 0) {
+                    encontrados++;
+
+                    let temp = cardapio.templates.item.replace(/\${img}/g, e.img)
+                        .replace(/\${nome}/g, e.name)
+                        .replace(/\${preco}/g, e.price.toFixed(2).replace('.', ','))
+                        .replace(/\${id}/g, e.id);
+
+                    $("#itensCardapio").append(temp);
+                }
+
+            });
+        });
+
+        if (encontrados == 0) {
+            $("#itensCardapio").html('<p class="col-12 text-center busca-vazia"><i class="fas fa-search"></i><br>Nenhum item encontrado para "' + $("<div>").text($("#txtBusca").val()).html() + '".</p>');
+        }
+
+    },
+
+    // limpa a busca e volta para a primeira categoria
+    limparBusca: () => {
+
+        $("#txtBusca").val('');
+        $("#btnLimparBusca").addClass('hidden');
+        cardapio.metodos.obterItensCardapio('burgers');
+
+    },
+
+    // exibe/oculta a seção "mais pedidos"
+    alternarMaisPedidos: (visivel) => {
+        $("#maisPedidos").toggleClass('hidden', !(visivel && cardapio.temMaisPedidos));
+    },
+
+    // lê o contador de pedidos (salvo neste navegador)
+    obterContagem: () => {
+        try {
+            return JSON.parse(localStorage.getItem('cardapio_contagem') || '{}');
+        } catch (e) {
+            return {};
+        }
+    },
+
+    // monta o carrossel: mais pedidos neste navegador + destaques (1º item de cada categoria)
+    carregarMaisPedidos: () => {
+
+        var contagem = cardapio.metodos.obterContagem();
+        var lista = [];
+
+        $.each(MENU, (cat, itens) => {
+            $.each(itens, (i, e) => {
+                lista.push({ item: e, ordem: lista.length, peso: (contagem[e.id] || 0) * 1000 + (i == 0 ? 100 : 0) });
+            });
+        });
+
+        lista.sort((a, b) => { return (b.peso - a.peso) || (a.ordem - b.ordem); });
+        lista = lista.slice(0, 6);
+
+        $("#listaPopulares").html('');
+
+        $.each(lista, (i, o) => {
+
+            let temp = cardapio.templates.popular.replace(/\${img}/g, o.item.img)
+                .replace(/\${nome}/g, o.item.name)
+                .replace(/\${preco}/g, o.item.price.toFixed(2).replace('.', ','))
+                .replace(/\${id}/g, o.item.id);
+
+            $("#listaPopulares").append(temp);
+
+        });
+
+        cardapio.temMaisPedidos = lista.length > 0;
+        cardapio.metodos.alternarMaisPedidos(true);
+
+    },
+
+    // adiciona 1 unidade direto do carrossel
+    adicionarRapido: (id) => {
+
+        let achado = cardapio.metodos.buscarItemPorId(id);
+        if (!achado) { return; }
+
+        let objIndex = MEU_CARRINHO.findIndex((obj => obj.id == id));
+
+        if (objIndex >= 0) {
+            MEU_CARRINHO[objIndex].qntd += 1;
+        }
+        else {
+            let novo = $.extend({}, achado);
+            novo.qntd = 1;
+            MEU_CARRINHO.push(novo);
+        }
+
+        cardapio.metodos.mensagem('Item adicionado ao carrinho', 'green');
+        cardapio.metodos.atualizarBadgeTotal();
+
+    },
+
+    // ao enviar o pedido: conta os itens (mais pedidos) e guarda o endereço
+    registrarPedido: () => {
+
+        try {
+            var contagem = cardapio.metodos.obterContagem();
+
+            $.each(MEU_CARRINHO, (i, e) => {
+                contagem[e.id] = (contagem[e.id] || 0) + e.qntd;
+            });
+
+            localStorage.setItem('cardapio_contagem', JSON.stringify(contagem));
+
+            if (MEU_ENDERECO != null) {
+                localStorage.setItem('cardapio_endereco', JSON.stringify(MEU_ENDERECO));
+            }
+        } catch (e) { }
+
+        cardapio.metodos.carregarMaisPedidos();
+
+    },
+
+    // preenche o formulário com o último endereço usado
+    preencherEnderecoSalvo: () => {
+
+        // não sobrescreve se o cliente já começou a preencher
+        if ($("#txtEndereco").val().trim().length > 0 || $("#txtCEP").val().trim().length > 0) {
+            return;
+        }
+
+        var salvo = null;
+
+        try {
+            salvo = JSON.parse(localStorage.getItem('cardapio_endereco'));
+        } catch (e) { }
+
+        if (!salvo || !salvo.endereco) {
+            return;
+        }
+
+        $("#txtCEP").val(salvo.cep);
+        $("#txtEndereco").val(salvo.endereco);
+        $("#txtBairro").val(salvo.bairro);
+        $("#txtCidade").val(salvo.cidade);
+        $("#ddlUf").val(salvo.uf);
+        $("#txtNumero").val(salvo.numero);
+        $("#txtComplemento").val(salvo.complemento || '');
+
+        $("#avisoEnderecoSalvo").removeClass('hidden');
+        cardapio.metodos.mensagem('Endereço anterior carregado', 'green');
+
+    },
+
+    // descarta o endereço salvo para informar outro
+    limparEndereco: () => {
+
+        try { localStorage.removeItem('cardapio_endereco'); } catch (e) { }
+
+        $("#txtCEP, #txtEndereco, #txtBairro, #txtCidade, #txtNumero, #txtComplemento").val('');
+        $("#ddlUf").val('-1');
+        $("#avisoEnderecoSalvo").addClass('hidden');
+        $("#txtCEP").focus();
+
+    },
+
     // abre o depoimento
     abrirDepoimento: (depoimento) => {
 
@@ -575,6 +814,19 @@ cardapio.metodos = {
 
 cardapio.templates = {
 
+    popular: `
+        <div class="card-popular">
+            <div class="img-popular">
+                <img src="\${img}" />
+            </div>
+            <p class="nome-popular">\${nome}</p>
+            <div class="rodape-popular">
+                <span class="preco-popular"><b>R$ \${preco}</b></span>
+                <span class="btn-add-popular" onclick="cardapio.metodos.adicionarRapido('\${id}')"><i class="fas fa-plus"></i></span>
+            </div>
+        </div>
+    `,
+
     item: `
         <div class="col-12 col-lg-3 col-md-3 col-sm-6 mb-5 animated fadeInUp">
             <div class="card card-item" id="\${id}">
@@ -610,7 +862,7 @@ cardapio.templates = {
                 <span class="btn-menos" onclick="cardapio.metodos.diminuirQuantidadeCarrinho('\${id}')"><i class="fas fa-minus"></i></span>
                 <span class="add-numero-itens" id="qntd-carrinho-\${id}">\${qntd}</span>
                 <span class="btn-mais" onclick="cardapio.metodos.aumentarQuantidadeCarrinho('\${id}')"><i class="fas fa-plus"></i></span>
-                <span class="btn btn-remove no-mobile" onclick="cardapio.metodos.removerItemCarrinho('\${id}')"><i class="fa fa-times"></i></span>
+                <span class="btn btn-remove" onclick="cardapio.metodos.removerItemCarrinho('\${id}')"><i class="fa fa-times"></i></span>
             </div>
         </div>
     `,

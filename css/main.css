@@ -780,3 +780,91 @@ select.form-control {
     border-radius: 50px;
     margin-bottom: 10px;
 }
+
+/* ===== Busca, Mais pedidos e aviso de endereço ===== */
+
+.titulo-secao { font-size: 22px; color: var(--color-black); margin-bottom: 10px; }
+.titulo-secao i { color: var(--color-primary); }
+
+.lista-populares {
+    display: flex;
+    overflow-x: auto;
+    padding: 5px 5px 20px 5px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.lista-populares::-webkit-scrollbar { display: none; }
+
+.card-popular {
+    flex: none;
+    width: 160px;
+    margin-right: 15px;
+    padding: 10px;
+    background: var(--color-white);
+    border-radius: 20px;
+    box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1);
+    scroll-snap-align: start;
+}
+.img-popular img { width: 100%; height: 110px; object-fit: cover; border-radius: 12px; }
+.nome-popular {
+    margin: 8px 0 6px 0;
+    font-size: 14px;
+    color: var(--color-black);
+    height: 38px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.rodape-popular { display: flex; align-items: center; justify-content: space-between; }
+.preco-popular { color: var(--color-primary); font-size: 16px; }
+.btn-add-popular {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--color-primary);
+    color: var(--color-black-heavy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.btn-add-popular:active { transform: scale(.92); }
+
+.busca-wrap { position: relative; max-width: 560px; margin: 0 auto; }
+.busca-wrap > i.fa-search {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-out);
+    z-index: 2;
+}
+.busca-wrap .form-control { padding-left: 50px; padding-right: 50px; font-size: 17px; }
+.limpar-busca {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-out);
+    cursor: pointer;
+    z-index: 2;
+}
+.busca-vazia { color: var(--color-text-out); padding: 30px 0; }
+.busca-vazia i { font-size: 28px; margin-bottom: 8px; }
+
+.aviso-endereco {
+    display: block;
+    background: var(--color-secondary);
+    border-radius: 15px;
+    padding: 10px 15px;
+    font-size: 15px;
+    color: var(--color-black);
+}
+.aviso-endereco a { color: var(--color-black); font-weight: bold; text-decoration: underline; margin-left: 5px; }
